@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forum</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        .navbar {
+            background-color: #343a40; 
+        }
+
+        .footer {
+            background-color: #6c757d; 
+        }
+
+        .error-message {
+            color: red;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">Social Sharing</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="/register">Kişi Kayıt</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/signin">Oturum Açma</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/forum">Forum</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/users">Kişiler</a>
+                </li>
+                <li class="nav-item" th:if="${session.loggedInUserId != null}">
+                    <a class="nav-link" href="/logout">Çıkış Yap</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-5">
+    <!-- Hata mesajı -->
+    <div th:if="${errorMessage != null}" class="error-message">
+        <p th:text="${errorMessage}"></p>
+    </div>
+    <!-- Mesaj Gönderme Formu -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="card-title">Mesaj Gönder</h5>
+        </div>
+        <div class="card-body">
+            <form action="/forum" method="POST">
+                <div class="mb-3">
+                    <textarea class="form-control" id="message" name="message" rows="3" placeholder="Bir mesaj yazın..." required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Mesaj Gönder</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Forum Mesajlarını Listeleme -->
+    <h4>Mesajlar:</h4>
+    <div th:if="${forumMessages.content.isEmpty()}" class="alert alert-info">
+        Henüz hiç mesaj yok.
+    </div>
+    <div class="list-group mb-3">
+        <div th:each="forumMessage : ${forumMessages.content}" class="list-group-item list-group-item-action">
+            <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1" th:text="${forumMessage.user.firstName} + ' ' + ${forumMessage.user.lastName}"></h5>
+                <small class="comment-timestamp" th:text="${forumMessage.formattedTimestamp}"></small>        
+            </div>
+            <p class="mb-1" th:text="${forumMessage.message}"></p>
+        </div>
+    </div>
+
+    <!-- Sayfalama -->
+    <nav>
+        <ul class="pagination justify-content-center">
+            <!-- Önceki Sayfa -->
+            <li class="page-item" th:classappend="${forumMessages.hasPrevious()} ? '' : 'disabled'">
+                <a class="page-link" th:href="@{/forum(page=${forumMessages.number - 1})}" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+            <!-- Sayfa Numaraları -->
+            <li class="page-item" th:each="i : ${#numbers.sequence(0, forumMessages.totalPages - 1)}" th:classappend="${forumMessages.number == i} ? 'active'">
+                <a class="page-link" th:href="@{/forum(page=${i})}" th:text="${i + 1}"></a>
+            </li>
+            <!-- Sonraki Sayfa -->
+            <li class="page-item" th:classappend="${forumMessages.hasNext()} ? '' : 'disabled'">
+                <a class="page-link" th:href="@{/forum(page=${forumMessages.number + 1})}" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
+
+<footer class="footer text-white text-center py-3 mt-5">
+    <p>&copy; 2024 Social Sharing. Tüm hakları saklıdır.</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
